@@ -29,7 +29,7 @@ the firewall check can show unknown if `nft` or `iptables` is missing or the rul
 - OpenSSL 3 development files.
 - Python 3 for the optional report checker.
 
-i develop on Arch Linux. CI also builds on Ubuntu and Debian. the program uses Linux interfaces and does not run on macOS or Windows.
+i develop on arch. CI also builds on ubuntu and debian. the program uses linux interfaces and does not run on mac or windows.
 
 ## install the build tools
 
