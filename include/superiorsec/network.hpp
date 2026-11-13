@@ -19,4 +19,4 @@ std::vector<SocketInfo> parse_socket_table(std::string_view contents, std::strin
 std::string network_json(const std::vector<SocketInfo>& sockets);
 std::string network_text(const std::vector<SocketInfo>& sockets);
 
-} // namespace superiorsec
+}

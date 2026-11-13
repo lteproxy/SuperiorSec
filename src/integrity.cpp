@@ -23,7 +23,7 @@ namespace superiorsec {
 namespace {
 
 std::string errno_message(std::string_view action, const std::filesystem::path& path) {
-    return std::string(action) + " " + path.string() + ": " + std::strerror(errno);
+    return std::string(action) + " " + path.string() + ". " + std::strerror(errno) + ".";
 }
 
 std::string hex_encode(std::string_view input) {
@@ -58,13 +58,13 @@ bool hash_file(const std::filesystem::path& path, std::string& digest, std::stri
     }
     struct stat metadata {};
     if (::fstat(fd, &metadata) != 0 || !S_ISREG(metadata.st_mode)) {
-        error = "not a regular file: " + path.string();
+        error = "not a regular file. " + path.string() + ".";
         ::close(fd);
         return false;
     }
     EVP_MD_CTX* context = EVP_MD_CTX_new();
     if (context == nullptr || EVP_DigestInit_ex(context, EVP_sha256(), nullptr) != 1) {
-        error = "could not initialize SHA-256 for " + path.string();
+        error = "could not initialize SHA-256. " + path.string() + ".";
         EVP_MD_CTX_free(context);
         ::close(fd);
         return false;
@@ -81,7 +81,7 @@ bool hash_file(const std::filesystem::path& path, std::string& digest, std::stri
             break;
         }
         if (EVP_DigestUpdate(context, buffer.data(), static_cast<std::size_t>(count)) != 1) {
-            error = "SHA-256 update failed for " + path.string();
+            error = "SHA-256 update failed. " + path.string() + ".";
             good = false;
             break;
         }
@@ -96,7 +96,7 @@ bool hash_file(const std::filesystem::path& path, std::string& digest, std::stri
             digest.push_back(digits[bytes[i] & 0x0f]);
         }
     } else if (good) {
-        error = "SHA-256 finalization failed for " + path.string();
+        error = "SHA-256 finalization failed. " + path.string() + ".";
         good = false;
     }
     EVP_MD_CTX_free(context);
@@ -125,19 +125,19 @@ Hashes scan(const std::filesystem::path& root, const std::filesystem::path& base
     std::error_code error;
     std::filesystem::recursive_directory_iterator it(root, std::filesystem::directory_options::none, error), end;
     if (error) {
-        summary.errors.push_back("cannot scan " + root.string() + ": " + error.message());
+        summary.errors.push_back("cannot scan " + root.string() + ". " + error.message() + ".");
         return hashes;
     }
     for (; it != end; it.increment(error)) {
         if (error) {
-            summary.errors.push_back("directory traversal error: " + error.message());
+            summary.errors.push_back("directory traversal failed. " + error.message() + ".");
             error.clear();
             continue;
         }
         const auto path = it->path();
         const auto status = it->symlink_status(error);
         if (error) {
-            summary.errors.push_back("cannot inspect " + path.string() + ": " + error.message());
+            summary.errors.push_back("cannot inspect " + path.string() + ". " + error.message() + ".");
             error.clear();
             continue;
         }
@@ -145,7 +145,7 @@ Hashes scan(const std::filesystem::path& root, const std::filesystem::path& base
             continue;
         const auto relative = std::filesystem::relative(path, root, error);
         if (error) {
-            summary.errors.push_back("cannot make path relative: " + path.string());
+            summary.errors.push_back("cannot make path relative. " + path.string() + ".");
             error.clear();
             continue;
         }
@@ -164,32 +164,32 @@ Hashes scan(const std::filesystem::path& root, const std::filesystem::path& base
 bool load_manifest(const std::filesystem::path& path, Hashes& hashes, std::vector<std::string>& errors) {
     std::ifstream input(path, std::ios::binary);
     if (!input) {
-        errors.push_back("cannot read baseline " + path.string());
+        errors.push_back("cannot read baseline. " + path.string() + ".");
         return false;
     }
     std::string line;
     if (!std::getline(input, line) || line != "# SuperiorSec SHA-256 baseline v1") {
-        errors.push_back("baseline has an unsupported or invalid header");
+        errors.push_back("baseline has an unsupported or invalid header.");
         return false;
     }
     while (std::getline(input, line)) {
         const auto separator = line.find('\t');
         if (separator == std::string::npos || separator != 64) {
-            errors.push_back("baseline contains a malformed entry");
+            errors.push_back("baseline contains a malformed entry.");
             continue;
         }
         const auto digest = std::string_view(line).substr(0, separator);
         if (!std::all_of(digest.begin(), digest.end(), [](char ch) { return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'); })) {
-            errors.push_back("baseline contains a malformed SHA-256 digest");
+            errors.push_back("baseline contains a malformed SHA-256 digest.");
             continue;
         }
         std::string path_bytes;
         if (!hex_decode(std::string_view(line).substr(separator + 1), path_bytes)) {
-            errors.push_back("baseline contains an invalid encoded path");
+            errors.push_back("baseline contains an invalid encoded path.");
             continue;
         }
         if (!hashes.emplace(std::move(path_bytes), line.substr(0, separator)).second)
-            errors.push_back("baseline contains a duplicate path");
+            errors.push_back("baseline contains a duplicate path.");
     }
     return true;
 }
@@ -198,7 +198,7 @@ bool write_manifest(const std::filesystem::path& path, const Hashes& hashes, boo
     std::error_code fs_error;
     std::filesystem::create_directories(path.parent_path(), fs_error);
     if (fs_error) {
-        error = "cannot create baseline directory: " + fs_error.message();
+        error = "cannot create baseline directory. " + fs_error.message() + ".";
         return false;
     }
     const auto temp = path.string() + ".tmp." + std::to_string(::getpid());
@@ -228,7 +228,7 @@ bool write_manifest(const std::filesystem::path& path, const Hashes& hashes, boo
         }
     } else {
         if (::link(temp.c_str(), path.c_str()) != 0) {
-            error = errno == EEXIST ? "baseline already exists; pass --force to replace it" : errno_message("cannot install baseline", path);
+            error = errno == EEXIST ? "baseline already exists. use --force to replace it." : errno_message("cannot install baseline", path);
             ::unlink(temp.c_str());
             return false;
         }
@@ -250,7 +250,7 @@ IntegritySummary compare(const std::filesystem::path& root, const std::filesyste
     return summary;
 }
 
-} // namespace
+}
 
 std::filesystem::path default_baseline_path() {
     const char* state_home = std::getenv("XDG_STATE_HOME");
@@ -268,10 +268,10 @@ IntegritySummary create_integrity_baseline(const std::filesystem::path& root_pat
     std::error_code error;
     const auto root = std::filesystem::canonical(root_path, error);
     if (error || !std::filesystem::is_directory(root))
-        return {root_path, baseline_path, {}, {"root must be an accessible directory: " + root_path.string()}};
+        return {root_path, baseline_path, {}, {"root must be an accessible directory. " + root_path.string() + "."}};
     const auto baseline = std::filesystem::absolute(baseline_path).lexically_normal();
     if (!force && std::filesystem::exists(baseline))
-        return {root, baseline, {}, {"baseline already exists; pass --force to replace it"}};
+        return {root, baseline, {}, {"baseline already exists. use --force to replace it."}};
     IntegritySummary summary{root, baseline, {}, {}};
     const auto hashes = scan(root, baseline, summary);
     if (!summary.errors.empty()) return summary;
@@ -286,7 +286,7 @@ IntegritySummary check_integrity_baseline(const std::filesystem::path& root_path
     std::error_code error;
     const auto root = std::filesystem::canonical(root_path, error);
     if (error || !std::filesystem::is_directory(root))
-        return {root_path, baseline_path, {}, {"root must be an accessible directory: " + root_path.string()}};
+        return {root_path, baseline_path, {}, {"root must be an accessible directory. " + root_path.string() + "."}};
     const auto baseline = std::filesystem::absolute(baseline_path).lexically_normal();
     Hashes expected;
     std::vector<std::string> errors;
@@ -318,7 +318,7 @@ std::string integrity_json(const IntegritySummary& summary) {
 
 std::string integrity_text(const IntegritySummary& summary) {
     std::ostringstream output;
-    output << "Root: " << summary.root << "\nBaseline: " << summary.baseline << '\n';
+    output << "root is " << summary.root << ".\nbaseline is " << summary.baseline << ".\n";
     std::size_t changed{}, missing{}, added{}, recorded{};
     for (const auto& file : summary.files) {
         if (file.status == "changed") ++changed;
@@ -327,10 +327,10 @@ std::string integrity_text(const IntegritySummary& summary) {
         else if (file.status == "recorded") ++recorded;
         if (file.status != "unchanged") output << file.status << "\t" << file.path << '\n';
     }
-    output << "Files: " << summary.files.size() << ", recorded: " << recorded << ", changed: " << changed
-           << ", missing: " << missing << ", new: " << added << '\n';
-    for (const auto& error : summary.errors) output << "error: " << error << '\n';
+    output << summary.files.size() << " files total. " << recorded << " recorded. " << changed << " changed. "
+           << missing << " missing. " << added << " new.\n";
+    for (const auto& error : summary.errors) output << error << '\n';
     return output.str();
 }
 
-} // namespace superiorsec
+}

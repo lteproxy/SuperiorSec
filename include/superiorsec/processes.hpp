@@ -21,4 +21,4 @@ bool parse_process_stat(std::string_view line, int& parent_pid, char& state);
 std::string processes_json(const std::vector<ProcessInfo>& processes);
 std::string processes_text(const std::vector<ProcessInfo>& processes, std::size_t limit);
 
-} // namespace superiorsec
+}

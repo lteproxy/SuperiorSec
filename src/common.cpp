@@ -70,4 +70,4 @@ std::string checks_json(const std::vector<Check>& checks) {
     return output.str();
 }
 
-} // namespace superiorsec
+}

@@ -11,4 +11,4 @@ std::vector<Check> run_audit();
 std::string audit_json(const std::vector<Check>& checks);
 std::string audit_text(const std::vector<Check>& checks);
 
-} // namespace superiorsec
+}

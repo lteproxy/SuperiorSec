@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Validate the public JSON shape emitted by `superiorsec report --json`."""
-
 import json
 import sys
 from pathlib import Path
@@ -16,7 +14,7 @@ def validate(report: object) -> None:
     if not isinstance(report.get("system"), dict):
         raise ValueError("system must be an object")
     if not isinstance(report.get("process_count"), int) or report["process_count"] < 0:
-        raise ValueError("process_count must be a non-negative integer")
+        raise ValueError("process_count must be zero or greater")
     if not isinstance(report.get("network_sockets"), list):
         raise ValueError("network_sockets must be an array")
     checks = report.get("audit_checks")
@@ -29,7 +27,7 @@ def main() -> int:
         source = Path(sys.argv[1]).read_text(encoding="utf-8") if len(sys.argv) > 1 else sys.stdin.read()
         validate(json.loads(source))
     except (OSError, json.JSONDecodeError, ValueError) as error:
-        print(f"invalid SuperiorSec report: {error}", file=sys.stderr)
+        print(f"invalid SuperiorSec report. {error}", file=sys.stderr)
         return 1
     print("report schema is valid")
     return 0

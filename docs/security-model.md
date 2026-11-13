@@ -1,18 +1,23 @@
 # security model
 
-SuperiorSec is a local inspection tool. its default commands read Linux procfs and sysctl data, operating-system metadata, and selected configuration metadata. they do not write kernel settings, change firewall rules, start background services, or require root.
+SuperiorSec runs locally. it reads Linux files and settings. it does not change kernel settings or firewall rules. it does not start services. the usual commands do not need root.
 
-## data handling
+## data and reports
 
-- `system`, `processes`, `network`, `audit`, and `report` print data to the terminal or to the output file named by the user.
-- process command lines and socket endpoints can be sensitive. Review reports before storing or sharing them.
-- `integrity init` creates a SHA-256 manifest at the chosen path. the default is under the user's state directory. it refuses to replace an existing manifest unless `--force` is given.
-- `integrity check` reads the manifest and selected files. it does not repair or alter the scanned tree.
-- integrity checks compare file contents only. they do not record ownership, permissions, timestamps, or extended attributes. a manifest is not signed, so keep it somewhere an attacker who can alter the scanned files cannot also replace it.
-- symlinks are not followed by the integrity scanner. Files that cannot be read are reported as errors, and a partial scan does not produce a new baseline.
+the inspection commands print results to the terminal or to the file you choose.
+
+process command lines and socket addresses can reveal details about a machine. check reports before you save or share them.
+
+`integrity init` writes a SHA-256 manifest to the path you choose. the default is in your state directory. it will not replace an existing manifest unless you use `--force`.
+
+`integrity check` reads the manifest and the selected files. it does not change those files.
+
+integrity checks compare file contents only. they do not check file owners or permissions. they also ignore timestamps and extended attributes. the manifest is not signed. keep it somewhere separate from the files you check.
+
+the scanner skips symlinks. unreadable files are reported as errors. it will not write a new baseline if the scan has errors.
 
 ## limits
 
-process and socket details are subject to Linux permission checks and may be incomplete. the hardening checks are a small set of recommendations, not a complete audit or compliance certification. firewall inspection is best effort: it calls `nft list ruleset` or `iptables -S` when those programs are available, and the current users permissions may limit the result.
+Linux permissions can hide some process and socket details. the audit checks a few settings. it is not a full audit or compliance report. the firewall check runs `nft list ruleset` or `iptables -S` when either tool is installed. the result can be unknown if the current user cannot read the rules.
 
-SuperiorSec is intended for systems the operator owns or is authorized to inspect.
+use SuperiorSec only on systems you own or are allowed to inspect. check findings before changing system settings.

@@ -65,7 +65,7 @@ std::string socket_state(std::string_view state) {
     return "UNKNOWN(" + std::string(state) + ")";
 }
 
-} // namespace
+}
 
 std::vector<SocketInfo> parse_socket_table(std::string_view contents, std::string protocol, bool ipv6) {
     std::vector<SocketInfo> sockets;
@@ -120,7 +120,7 @@ std::string network_json(const std::vector<SocketInfo>& sockets) {
 
 std::string network_text(const std::vector<SocketInfo>& sockets) {
     std::ostringstream output;
-    output << "PROTO  LOCAL                 REMOTE                STATE        UID\n";
+    output << "PROTO  local                 remote                state        UID\n";
     for (const auto& socket : sockets)
         output << socket.protocol << "\t" << socket.local_address << "\t" << socket.remote_address << "\t"
                << socket.state << "\t" << socket.uid << '\n';
@@ -128,4 +128,4 @@ std::string network_text(const std::vector<SocketInfo>& sockets) {
     return output.str();
 }
 
-} // namespace superiorsec
+}

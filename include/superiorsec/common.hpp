@@ -21,4 +21,4 @@ std::string trim(std::string value);
 std::string read_text_file(const std::string& path);
 std::string checks_json(const std::vector<Check>& checks);
 
-} // namespace superiorsec
+}

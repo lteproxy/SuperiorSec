@@ -21,4 +21,4 @@ SystemInfo inspect_system();
 std::string system_json(const SystemInfo& info);
 std::string system_text(const SystemInfo& info);
 
-} // namespace superiorsec
+}

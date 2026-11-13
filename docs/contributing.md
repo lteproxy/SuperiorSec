@@ -1,14 +1,14 @@
-# Contributing
+# contributing
 
-Keep security checks read-only unless a separately reviewed feature has a clear, explicit user action. Do not add shell execution built from user-supplied strings, collect secrets, or claim coverage that the implementation does not provide.
+keep security checks read only unless a feature has a clear user action. do not build shell commands from user input. do not collect secrets. do not claim checks the code does not perform.
 
-Use the existing CMake build and CTest suite:
+run the build and tests with these commands.
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
-./build/superiorsec report --json | python3 tools/validate_report.py
+./build/superiorsec report --json | python3 tests/validate_report.py
 ```
 
-New modules should have focused tests and document Linux interfaces, permission requirements, and known limits. Keep optional tooling small and avoid adding runtime dependencies without a concrete need.
+new modules should have focused tests. explain which Linux interfaces they use and note permission needs and known limits. keep helper tools small. add a runtime dependency only when the project needs it.

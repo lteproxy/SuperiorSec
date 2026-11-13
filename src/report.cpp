@@ -23,7 +23,7 @@ std::string timestamp_utc() {
     return output.str();
 }
 
-} // namespace
+}
 
 std::string build_report_json() {
     const auto system = inspect_system();
@@ -45,10 +45,10 @@ std::string build_report_text() {
     const auto sockets = inspect_network();
     const auto checks = run_audit();
     std::ostringstream output;
-    output << "SuperiorSec system report\nGenerated: " << timestamp_utc() << "\n\n"
-           << system_text(system) << "\nProcesses: " << processes.size() << "\n\n"
+    output << "SuperiorSec system report.\ngenerated at " << timestamp_utc() << ".\n\n"
+           << system_text(system) << "\nprocess count is " << processes.size() << ".\n\n"
            << network_text(sockets) << '\n' << audit_text(checks);
     return output.str();
 }
 
-} // namespace superiorsec
+}

@@ -64,14 +64,14 @@ CommandResult capture(const std::filesystem::path& executable, const char* argum
 Check sysctl_check(const std::string& name, const std::string& path, const std::string& expected,
                    bool (*passes)(long)) {
     const auto raw = trim(read_text_file(path));
-    if (raw.empty()) return {name, Severity::info, "unknown", "setting is unavailable or unreadable"};
+    if (raw.empty()) return {name, Severity::info, "unknown", "setting is unavailable or unreadable."};
     try {
         const auto value = std::stol(raw);
         const bool good = passes(value);
         return {name, good ? Severity::info : Severity::warning, good ? "pass" : "review",
-                "current value " + raw + "; recommended " + expected};
+                "current value " + raw + ". recommended " + expected + "."};
     } catch (...) {
-        return {name, Severity::info, "unknown", "could not parse value: " + raw};
+        return {name, Severity::info, "unknown", "could not parse value " + raw + "."};
     }
 }
 
@@ -83,13 +83,13 @@ bool exactly_zero(long value) { return value == 0; }
 Check ssh_permissions_check() {
     constexpr const char* path = "/etc/ssh/sshd_config";
     struct stat metadata {};
-    if (::lstat(path, &metadata) != 0) return {"SSH server config", Severity::info, "skipped", "no local sshd_config found"};
-    if (S_ISLNK(metadata.st_mode)) return {"SSH server config", Severity::warning, "review", "configuration path is a symlink"};
+    if (::lstat(path, &metadata) != 0) return {"SSH server config", Severity::info, "skipped", "no local sshd_config found."};
+    if (S_ISLNK(metadata.st_mode)) return {"SSH server config", Severity::warning, "review", "configuration path is a symlink."};
     const bool writable = (metadata.st_mode & (S_IWGRP | S_IWOTH)) != 0;
     const bool root_owned = metadata.st_uid == 0;
     const bool good = root_owned && !writable;
-    std::string detail = root_owned ? "owned by root" : "not owned by root";
-    detail += writable ? "; group or other users can write it" : "; not writable by group or other users";
+    std::string detail = root_owned ? "owned by root." : "not owned by root.";
+    detail += writable ? " group or other users can write it." : " group and other users cannot write it.";
     return {"SSH server config", good ? Severity::info : Severity::warning, good ? "pass" : "review", std::move(detail)};
 }
 
@@ -114,7 +114,7 @@ Check firewall_check() {
             break;
         }
         return {"nftables ruleset", configured ? Severity::info : Severity::warning,
-                configured ? "found" : "review", configured ? "rule lines or a restrictive chain policy were found" : "no rules or restrictive chain policy were found"};
+                configured ? "found" : "review", configured ? "rule lines or a restrictive chain policy were found." : "no rules or restrictive chain policy were found."};
     }
 
     const std::array<std::filesystem::path, 2> iptables_paths{"/usr/sbin/iptables", "/usr/bin/iptables"};
@@ -134,20 +134,20 @@ Check firewall_check() {
             }
         }
         return {"iptables ruleset", configured ? Severity::info : Severity::warning,
-                configured ? "found" : "review", configured ? "rules or a restrictive default policy were found" : "no rules or restrictive default policy were found"};
+                configured ? "found" : "review", configured ? "rules or a restrictive default policy were found." : "no rules or restrictive default policy were found."};
     }
-    return {"Firewall ruleset", Severity::info, "unknown", "nftables or iptables could not be inspected"};
+    return {"firewall ruleset", Severity::info, "unknown", "nftables or iptables could not be inspected."};
 }
 
-} // namespace
+}
 
 std::vector<Check> run_audit() {
     std::vector<Check> checks;
-    checks.push_back(sysctl_check("Address space randomization", "/proc/sys/kernel/randomize_va_space", "2", exactly_two));
-    checks.push_back(sysctl_check("Kernel pointer exposure", "/proc/sys/kernel/kptr_restrict", "2", at_least_two));
-    checks.push_back(sysctl_check("Kernel log access", "/proc/sys/kernel/dmesg_restrict", "1 or higher", at_least_one));
-    checks.push_back(sysctl_check("Ptrace scope", "/proc/sys/kernel/yama/ptrace_scope", "1 or higher", at_least_one));
-    checks.push_back(sysctl_check("Setuid core dumps", "/proc/sys/fs/suid_dumpable", "0", exactly_zero));
+    checks.push_back(sysctl_check("address space randomization", "/proc/sys/kernel/randomize_va_space", "2", exactly_two));
+    checks.push_back(sysctl_check("kernel pointer exposure", "/proc/sys/kernel/kptr_restrict", "2", at_least_two));
+    checks.push_back(sysctl_check("kernel log access", "/proc/sys/kernel/dmesg_restrict", "1 or higher", at_least_one));
+    checks.push_back(sysctl_check("ptrace scope", "/proc/sys/kernel/yama/ptrace_scope", "1 or higher", at_least_one));
+    checks.push_back(sysctl_check("setuid core dumps", "/proc/sys/fs/suid_dumpable", "0", exactly_zero));
     checks.push_back(ssh_permissions_check());
     checks.push_back(firewall_check());
     return checks;
@@ -160,9 +160,9 @@ std::string audit_json(const std::vector<Check>& checks) {
 std::string audit_text(const std::vector<Check>& checks) {
     std::ostringstream output;
     for (const auto& check : checks)
-        output << '[' << severity_name(check.severity) << "] " << check.name << ": " << check.status << " — " << check.detail << '\n';
-    output << "Checks are informational; validate recommendations against your system and threat model.\n";
+        output << severity_name(check.severity) << ". " << check.name << ". " << check.status << ". " << check.detail << '\n';
+    output << "these checks are for guidance. review each result for your system and threat model.\n";
     return output.str();
 }
 
-} // namespace superiorsec
+}

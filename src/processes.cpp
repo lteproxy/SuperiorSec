@@ -40,7 +40,7 @@ std::string process_command(int pid, std::string_view fallback) {
     return command.empty() ? std::string(fallback) : command;
 }
 
-} // namespace
+}
 
 bool parse_process_stat(std::string_view line, int& parent_pid, char& state) {
     const auto open = line.find('(');
@@ -93,15 +93,15 @@ std::string processes_json(const std::vector<ProcessInfo>& processes) {
 
 std::string processes_text(const std::vector<ProcessInfo>& processes, std::size_t limit) {
     std::ostringstream output;
-    output << "PID      PPID     UID      STATE  COMMAND\n";
+    output << "PID      PPID     UID      state  command\n";
     const auto count = std::min(limit, processes.size());
     for (std::size_t i = 0; i < count; ++i) {
         const auto& process = processes[i];
         output << process.pid << "\t" << process.parent_pid << "\t" << process.uid << "\t"
                << process.state << "\t" << process.command << '\n';
     }
-    output << "Showing " << count << " of " << processes.size() << " processes\n";
+    output << "showing " << count << " of " << processes.size() << " processes.\n";
     return output.str();
 }
 
-} // namespace superiorsec
+}

@@ -15,12 +15,12 @@ namespace {
 
 void require(bool condition, const char* message) {
     if (!condition) {
-        std::cerr << "FAIL: " << message << '\n';
+        std::cerr << "test failure. " << message << '\n';
         std::exit(1);
     }
 }
 
-} // namespace
+}
 
 int main() {
     require(superiorsec::json_escape("a\n\"b") == "a\\n\\\"b", "JSON escaping");

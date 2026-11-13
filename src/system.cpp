@@ -27,7 +27,7 @@ std::string unquote(std::string value) {
     return value;
 }
 
-} // namespace
+}
 
 SystemInfo inspect_system() {
     SystemInfo result;
@@ -91,14 +91,14 @@ std::string system_json(const SystemInfo& info) {
 
 std::string system_text(const SystemInfo& info) {
     std::ostringstream output;
-    output << "Host: " << (info.hostname.empty() ? "unknown" : info.hostname)
-           << "\nOS: " << (info.os.empty() ? "unknown" : info.os)
-           << "\nKernel: " << (info.kernel.empty() ? "unknown" : info.kernel)
-           << "\nArchitecture: " << (info.architecture.empty() ? "unknown" : info.architecture)
-           << "\nUptime: " << info.uptime_seconds << " seconds"
-           << "\nMemory: " << info.memory_available_kib << " KiB available of " << info.memory_total_kib << " KiB"
-           << "\nRoot filesystem: " << info.root_available_bytes << " bytes available of " << info.root_total_bytes << " bytes\n";
+    output << "host is " << (info.hostname.empty() ? "unknown" : info.hostname)
+           << ".\nos is " << (info.os.empty() ? "unknown" : info.os)
+           << ".\nkernel is " << (info.kernel.empty() ? "unknown" : info.kernel)
+           << ".\narchitecture is " << (info.architecture.empty() ? "unknown" : info.architecture)
+           << ".\nuptime is " << info.uptime_seconds << " seconds"
+           << ".\nmemory has " << info.memory_available_kib << " KiB available of " << info.memory_total_kib << " KiB"
+           << ".\nroot filesystem has " << info.root_available_bytes << " bytes available of " << info.root_total_bytes << " bytes.\n";
     return output.str();
 }
 
-} // namespace superiorsec
+}

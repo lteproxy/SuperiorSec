@@ -16,9 +16,9 @@
 namespace {
 
 constexpr std::string_view usage = R"(SuperiorSec 0.1.0
-Read-only Linux security and privacy inspection tools.
+linux security inspection from the command line.
 
-Usage:
+usage
   superiorsec system [--json]
   superiorsec processes [--limit N] [--json]
   superiorsec network [--json]
@@ -80,7 +80,7 @@ int run(int argc, char** argv) {
         if (const auto value = option(args, "--limit")) {
             const auto [end, error] = std::from_chars(value->data(), value->data() + value->size(), limit);
             if (error != std::errc{} || end != value->data() + value->size()) {
-                std::cerr << "--limit must be a non-negative integer\n";
+                std::cerr << "--limit must be zero or greater.\n";
                 return 2;
             }
         }
@@ -106,7 +106,7 @@ int run(int argc, char** argv) {
     }
     if (command == "integrity") {
         if (args.empty() || (args[0] != "init" && args[0] != "check")) {
-            std::cerr << "integrity requires the init or check action\n";
+            std::cerr << "integrity requires the init or check action.\n";
             return 2;
         }
         const bool checking = args[0] == "check";
@@ -123,7 +123,7 @@ int run(int argc, char** argv) {
         if (const auto destination = option(args, "--output")) {
             std::ofstream output(std::string(*destination), std::ios::binary | std::ios::trunc);
             if (!output || !(output << content << (json ? "\n" : ""))) {
-                std::cerr << "could not write report to " << *destination << '\n';
+                std::cerr << "could not write report. " << *destination << ".\n";
                 return 1;
             }
         } else {
@@ -132,17 +132,17 @@ int run(int argc, char** argv) {
         }
         return 0;
     }
-    std::cerr << "unknown command: " << command << "\n\n" << usage;
+    std::cerr << "unknown command. " << command << ".\n\n" << usage;
     return 2;
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) {
     try {
         return run(argc, argv);
     } catch (const std::exception& error) {
-        std::cerr << "SuperiorSec: " << error.what() << '\n';
+        std::cerr << "SuperiorSec error. " << error.what() << '\n';
         return 1;
     }
 }

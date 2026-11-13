@@ -29,4 +29,4 @@ IntegritySummary check_integrity_baseline(const std::filesystem::path& root,
 std::string integrity_json(const IntegritySummary& summary);
 std::string integrity_text(const IntegritySummary& summary);
 
-} // namespace superiorsec
+}
