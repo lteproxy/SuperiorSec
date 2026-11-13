@@ -4,7 +4,7 @@
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue?logo=githubactions&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 
-SuperiorSec is a Linux security and privacy inspection CLI. It collects local system information, process and socket snapshots, checks selected hardening settings, and can compare files against a SHA-256 baseline.
+SuperiorSec is a linux security and privacy inspection CLI. it collects local system information, process and socket snapshots, checks selected hardening settings, and can compare files against a SHA-256 baseline.
 The normal inspection commands are read-only and run without root perms
 
 ## about
