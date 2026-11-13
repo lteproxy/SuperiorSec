@@ -39,7 +39,7 @@ on Arch Linux run this command.
 sudo pacman -S --needed base-devel cmake openssl
 ```
 
-on Debian or Ubuntu run these commands.
+on debian or ubuntu run these commands
 
 ```sh
 sudo apt-get update
@@ -111,10 +111,6 @@ docs/                 security and contribution notes
 use SuperiorSec only on systems you own or have permission to inspect. it does not exploit systems or collect credentials. it does not monitor keystrokes or add persistence. it does not change firewall rules or kernel settings. some files may need extra permissions to read. this can leave gaps in the results. use elevated permissions only when a specific read needs them.
 
 the checks cover a few settings. they are not a full security review. what to do with a result depends on your system and what you want to protect. see `docs/security-model.md`.
-
-## where things stand
-
-SuperiorSec is still a work in progress. the commands in this guide are implemented and covered by tests. i plan to keep improving the project as i learn more.
 
 ## license
 
